@@ -1,0 +1,29 @@
+---
+- name: Update server
+  hosts: ap-s1
+  become: yes
+  become_method: sudo
+  vars_files:
+    - host_vars/ap-s1.yml
+
+  tasks:
+    - name: 2. Update OS
+      command: apt update
+
+    - name: 1. Update package repository
+      command: apt-get update -y
+
+    - name: 2. Install software properties common
+      command: apt-get install -y software-properties-common
+
+    - name: 2. Install ca-certificates
+      apt: name=ca-certificates state=latest update_cache=yes force_apt_get=yes 
+
+    - name: 3. Add the intermediate certificate to certificate bundle
+      command: update-ca-certificates
+
+    - name: 4. Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: 5. Install common required system packages
+      apt: name={{ common_required_packages }} state=latest update_cache=yes

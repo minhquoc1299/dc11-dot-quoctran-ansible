@@ -1,0 +1,6 @@
+common_required_packages:
+  - "gpg"
+  - "jq"
+  - "unzip"
+  - "wget"
+  - "git"

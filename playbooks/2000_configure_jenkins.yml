@@ -1,0 +1,50 @@
+---
+- name: Configure Jenkins Server
+  hosts: ap-s1
+  become: yes
+  become_method: sudo
+  vars_files:
+    - host_vars/ap-s1.yml
+
+  tasks:
+    - name: 1. Set hostname
+      hostname:
+        name: jenkins-server 
+
+    - name: 2. Install Java
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: 3. Download Jenkins APT repository key
+      shell: |
+        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+    - name: 4. Import key jenkins
+      shell: |
+        echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+    - name: 5. Update OS
+      command: apt update
+
+    - name: 6. Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+      notify:
+        - Start Jenkins Service
+
+  handlers:
+    - name: 1. Start Jenkins Service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: 2. Get Jenkins initial admin password
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_initial_password
+
+    - name: 3. Print Jenkins initial admin password
+      debug:
+        var: jenkins_initial_password.stdout_lines[0]
