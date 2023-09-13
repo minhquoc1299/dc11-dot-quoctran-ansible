@@ -7,23 +7,35 @@
     - host_vars/ap-s1.yml
 
   tasks:
-    - name: 2. Update OS
+    - name: 1. Update OS
       command: apt update
 
-    - name: 1. Update package repository
+    - name: 2. Update package repository
       command: apt-get update -y
 
-    - name: 2. Install software properties common
-      command: apt-get install -y software-properties-common
+    - name: 3. Install ca-certificates
+      apt:
+        name: ca-certificates
+        state: present
+        force_apt_get: yes 
 
-    - name: 2. Install ca-certificates
-      apt: name=ca-certificates state=latest update_cache=yes force_apt_get=yes 
+    - name: 4. Install software properties common
+      apt: 
+        name: software-properties-common 
+        state: present
+        force_apt_get: yes
 
-    - name: 3. Add the intermediate certificate to certificate bundle
+    - name: 5. Add the intermediate certificate to certificate bundle
       command: update-ca-certificates
 
-    - name: 4. Install aptitude using apt
-      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+    - name: 6. Install aptitude using apt
+      apt: 
+        name: aptitude 
+        state: present
+        force_apt_get: yes
 
-    - name: 5. Install common required system packages
-      apt: name={{ common_required_packages }} state=latest update_cache=yes
+    - name: 7. Install common required system packages
+      apt:
+        name: "{{ common_required_packages }}"
+        state: present
+        force_apt_get: yes

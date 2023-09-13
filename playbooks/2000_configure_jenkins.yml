@@ -31,8 +31,14 @@
       apt:
         name: jenkins
         state: present
+
+    - name: 7. Call handlers
+      shell: |
+        echo "Test call handlers with status of task is changed" | sudo tee /home/ubuntu/debug-ansible.txt > /dev/null
       notify:
-        - Start Jenkins Service
+        - 1. Start Jenkins Service
+        - 2. Get Jenkins initial admin password
+        - 3. Print Jenkins initial admin password
 
   handlers:
     - name: 1. Start Jenkins Service
