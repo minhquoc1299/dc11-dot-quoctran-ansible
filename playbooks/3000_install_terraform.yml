@@ -1,0 +1,51 @@
+---
+- name: Install terraform
+  hosts: ap-s1
+  become: yes
+  become_method: sudo
+  vars_files:
+    - host_vars/ap-s1.yml
+
+  tasks:
+    - name: 1. Install Python modules
+      pip:
+        name:
+          - boto3
+          - awscli
+          - RBTools
+        executable: pip3
+
+    - name: 2. Install GPG
+      apt:
+        name: gpg
+        state: present
+
+    - name: 3.1 Download Terraform APT repository key
+      shell: |
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+    - name: 3.2 Import key terraform
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+    
+    - name: 4.1. Add nodejs gpg key
+      apt_key:
+        url: "{{ nodejs_gpg_url }}"
+        state: present
+
+    - name: 4.2. Add nodejs 18.x repo for Ubuntu 22
+      apt_repository:
+        repo: "{{ nodejs_apt_repo }}"
+        state: present
+
+    - name: 5. Update OS
+      command: apt update
+
+    - name: 6. Install build & cicd tool packages
+      apt: name={{ build_cicd_tool_packages }} state=latest update_cache=yes
+    
+    - name: 7. Install AWS Session Manager
+      shell: |
+        curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+        dpkg -i session-manager-plugin.deb
+
