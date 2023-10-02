@@ -49,3 +49,22 @@
         curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
         dpkg -i session-manager-plugin.deb
 
+    - name: 8.0 Create aws dir
+      ansible.builtin.file:
+        path: /home/ubuntu/.aws
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: 8.1 Copy AWS config and cred files
+      copy:
+        src: /home/ubuntu/.aws/{{ item }}
+        dest: /home/ubuntu/.aws/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0655'
+        remote_src: false
+      with_items:
+        - config
+        - credentials
